@@ -17,29 +17,27 @@ $("#submit-btn").on("click", function (event) {
   event.preventDefault();
 
   //Create storage variables
-  var trainName = "";
+  var trainName  = "";
   var destination = "";
   var firstTrain = "";
   var frequency = "";
-  var momentTime = "";
   
   trainName = $("#train-name").val().trim();
   destination = $("#destination").val().trim();
   firstTrain = $("#first-train").val().trim();
-  momentObject = moment($("#first-train").val().trim(), "HH:mm");
   frequency = parseInt($("#frequency").val().trim());
 
   // Logs everything to console
   console.log(trainName);
   console.log(destination);
   console.log(firstTrain);
-  console.log(momentObject);
-  console.log(momentObject.isValid());
-  console.log("CORRECTED TIME: " + moment(momentObject).format("HH:mm"));
+  console.log(moment($("#first-train").val().trim(), "HH:mm").isValid());
   console.log(frequency);
 
-  if (!momentObject.isValid() || isNaN(frequency)) {
-    alert ("The information entered into the First Train Time and/or Frequency text boxes were not valid entries.  Please enter appropriate information into each of the text boxes.");
+  if (!moment($("#first-train").val().trim(), "HH:mm").isValid() || isNaN(frequency) || trainName === "" || destination === "") {
+    alert ("The one of the pieces of information entered into the text boxes is either missing or not valid entries.  Please enter appropriate information into each of the text boxes.");
+    $("#train-name").val("");
+    $("#destination").val("");
     $("#first-train").val("");
     $("#frequency").val("");
   } else {
@@ -65,15 +63,32 @@ database.ref().on("child_added", function(childSnapshot){
 // Create storage variables
   var name = childSnapshot.val().trainName;
   var dest = childSnapshot.val().destination;
-  var first = childSnapshot.val().firstTrain;
+  var momentObject = moment(childSnapshot.val().firstTrain, "HH:mm").subtract(1, "days");
   var freq = childSnapshot.val().frequency;
+  
+  var diffTime = moment().diff(momentObject, "minutes");
+  console.log(momentObject);
+  console.log(diffTime);
+
+  // Time apart (remainder)
+  var tRemainder = diffTime % freq;
+  console.log(tRemainder);
+
+  // Minute Until Train
+  var tMinutesTillTrain = freq - tRemainder;
+  console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
+
+  // Next Train
+  var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+  console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
 
   var newRow = $("<tr>").append(
     $("<td>").text(name),
     $("<td>").text(dest),
     $("<td>").text(freq),
+    $("<td>").text(nextTrain),
+    $("<td>").text(tMinutesTillTrain),
   );
 
   $("#current-trains").append(newRow);
-
-});
+  });
