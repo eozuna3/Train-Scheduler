@@ -13,6 +13,35 @@ firebase.initializeApp(firebaseConfig);
 
 var database = firebase.database();
 
+// Function to calculate train times as post new row
+function newRow(trainName, trainDest, trainFreq, trainTime){
+  var momentObject = moment(trainTime).subtract(1, "days");
+  var diffTime = moment().diff(momentObject, "minutes");
+  var tRemainder = diffTime % trainFreq;
+
+  // Minutes Until Train Arrives
+  var tMinutesTillTrain = trainFreq - tRemainder;
+
+  // Next Train Calculation
+  var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+
+  //  Create a new row with the information enter and calculated
+  var newRow = $("<tr>").append(
+    $("<td>").text(trainName),
+    $("<td>").text(trainDest),
+    $("<td>").text(trainFreq),
+    $("<td>").text(moment(nextTrain).format("LT")),
+    $("<td>").text(tMinutesTillTrain),
+  );
+  
+  // Append new row
+  $("#current-trains").append(newRow);
+}
+
+//  Create initial rows as examples
+newRow ("Trenton Express", "Trenton", 30, 0600);
+newRow("Boston Bus", "Boston", 65, 0715);
+
 $("#submit-btn").on("click", function (event) {
   event.preventDefault();
 
@@ -26,13 +55,6 @@ $("#submit-btn").on("click", function (event) {
   destination = $("#destination").val().trim();
   firstTrain = $("#first-train").val().trim();
   frequency = parseInt($("#frequency").val().trim());
-
-  // Logs everything to console
-  console.log(trainName);
-  console.log(destination);
-  console.log(firstTrain);
-  console.log(moment($("#first-train").val().trim(), "HH:mm").isValid());
-  console.log(frequency);
 
   if (!moment($("#first-train").val().trim(), "HH:mm").isValid() || isNaN(frequency) || trainName === "" || destination === "") {
     alert ("The one of the pieces of information entered into the text boxes is either missing or not valid entries.  Please enter appropriate information into each of the text boxes.");
@@ -61,33 +83,10 @@ $("#submit-btn").on("click", function (event) {
 database.ref().on("child_added", function(childSnapshot){
 
 // Create storage variables
-  var name = childSnapshot.val().trainName;
-  var dest = childSnapshot.val().destination;
-  var momentObject = moment(childSnapshot.val().firstTrain, "HH:mm").subtract(1, "days");
-  var freq = childSnapshot.val().frequency;
-  var diffTime = moment().diff(momentObject, "minutes");
-  var tRemainder = diffTime % freq;
-  
-  console.log(tRemainder);
-  console.log(momentObject);
-  console.log(diffTime);
+var name = childSnapshot.val().trainName;
+var dest = childSnapshot.val().destination;
+var freq = childSnapshot.val().frequency;
+var time = childSnapshot.val().firstTrain;
 
-  // Minutes Until Train Arrives
-  var tMinutesTillTrain = freq - tRemainder;
-  console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
-
-  // Next Train Calculation
-  var nextTrain = moment().add(tMinutesTillTrain, "minutes");
-  console.log("ARRIVAL TIME: " + moment(nextTrain).format("LT"));
-
-  //  Create a new row with the information enter and calculated
-  var newRow = $("<tr>").append(
-    $("<td>").text(name),
-    $("<td>").text(dest),
-    $("<td>").text(freq),
-    $("<td>").text(moment(nextTrain).format("LT")),
-    $("<td>").text(tMinutesTillTrain),
-  );
-
-  $("#current-trains").append(newRow);
-  });
+newRow(name, dest, freq, time);
+});
