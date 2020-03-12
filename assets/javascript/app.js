@@ -65,28 +65,27 @@ database.ref().on("child_added", function(childSnapshot){
   var dest = childSnapshot.val().destination;
   var momentObject = moment(childSnapshot.val().firstTrain, "HH:mm").subtract(1, "days");
   var freq = childSnapshot.val().frequency;
-  
   var diffTime = moment().diff(momentObject, "minutes");
+  var tRemainder = diffTime % freq;
+  
+  console.log(tRemainder);
   console.log(momentObject);
   console.log(diffTime);
 
-  // Time apart (remainder)
-  var tRemainder = diffTime % freq;
-  console.log(tRemainder);
-
-  // Minute Until Train
+  // Minutes Until Train Arrives
   var tMinutesTillTrain = freq - tRemainder;
   console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
 
-  // Next Train
+  // Next Train Calculation
   var nextTrain = moment().add(tMinutesTillTrain, "minutes");
-  console.log("ARRIVAL TIME: " + moment(nextTrain).format("hh:mm"));
+  console.log("ARRIVAL TIME: " + moment(nextTrain).format("LT"));
 
+  //  Create a new row with the information enter and calculated
   var newRow = $("<tr>").append(
     $("<td>").text(name),
     $("<td>").text(dest),
     $("<td>").text(freq),
-    $("<td>").text(nextTrain),
+    $("<td>").text(moment(nextTrain).format("LT")),
     $("<td>").text(tMinutesTillTrain),
   );
 
