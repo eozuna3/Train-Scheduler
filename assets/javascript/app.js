@@ -55,7 +55,6 @@ $("#submit-btn").on("click", function (event) {
   trainName = $("#train-name").val().trim();
   destination = $("#destination").val().trim();
   firstTrain = $("#first-train").val().trim();
-  console.log(moment(firstTrain));
   frequency = parseInt($("#frequency").val().trim());
 
   // Check to make sure all appropriate information is entered into the text-boxes
