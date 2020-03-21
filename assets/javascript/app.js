@@ -15,7 +15,7 @@ var database = firebase.database();
 
 // Function to calculate train times and post new row
 function newRow(trainName, trainDest, trainFreq, trainTime){
-  var momentObject = moment(trainTime).subtract(1, "days");
+  var momentObject = moment(trainTime, "HH:mm").subtract(1, "days");
   var diffTime = moment().diff(momentObject, "minutes");
   var tRemainder = diffTime % trainFreq;
 
@@ -39,8 +39,8 @@ function newRow(trainName, trainDest, trainFreq, trainTime){
 }
 
 //  Create initial rows as examples
-newRow ("Trenton Express", "Trenton", 30, 0600);
-newRow("Boston Bus", "Boston", 65, 0715);
+newRow("Trenton Express", "Trenton", 30, "06:00");
+newRow("Boston Bus", "Boston", 65, "07:15");
 
 $("#submit-btn").on("click", function (event) {
   event.preventDefault();
@@ -55,6 +55,7 @@ $("#submit-btn").on("click", function (event) {
   trainName = $("#train-name").val().trim();
   destination = $("#destination").val().trim();
   firstTrain = $("#first-train").val().trim();
+  console.log(moment(firstTrain));
   frequency = parseInt($("#frequency").val().trim());
 
   // Check to make sure all appropriate information is entered into the text-boxes
